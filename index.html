@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deva Computer Typing Center</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- WATERMARK KE LIYE -->
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+
+<header>
+<div class="logo">Deva Computer <span>Typing Center</span></div>
+<nav><ul>
+<li><a href="#" onclick="showTab('home')">होम</a></li>
+<li><a href="#" onclick="showTab('library')">लाइब्रेरी</a></li>
+<li><a href="typing.html" style="background:#ff8c00;color:#000;padding:6px 14px;border-radius:8px;font-weight:800;">⌨️ Typing Test</a></li>
+<li><a href="#" onclick="showTab('reviews')">समीक्षा</a></li>
+<li><a href="#" onclick="showTab('contact')">संपर्क</a></li>
+<li><a href="admin.html" class="admin-btn">Admin</a></li>
+</ul></nav>
+</header>
+
+<div class="search-bar"><input type="text" id="searchInput" placeholder="🔍 CCC, Typing, O Level... सर्च करें" onkeyup="searchPDFs()"></div>
+
+<section id="home" class="tab active">
+<div class="hero">
+<h1>देवा कंप्यूटर टाइपिंग सेंटर - ई-बुक लाइब्रेरी</h1>
+<!-- NAYA TYPING TEST BUTTON -->
+<a href="typing.html" class="btn-primary" style="max-width:340px;margin:18px auto 0 auto;background:#ff8c00;color:#000;font-size:16px">⌨️ Free Typing Test Start Kare - English / KrutiDev / Mangal</a>
+</div>
+
+<h2 class="section-title">Browse by Folder</h2>
+<div id="folderListHome" class="folder-grid"></div>
+
+<h2 class="section-title">Recent PDFs</h2>
+<div id="recentPdfs" class="pdf-grid"></div>
+</section>
+
+<section id="library" class="tab">
+<h2 class="section-title">सभी फोल्डर और ई-बुक्स</h2>
+<div id="folderListLib" class="folder-grid"></div>
+<div id="pdfList" class="pdf-grid"></div>
+</section>
+
+<section id="reviews" class="tab">
+<h2 class="section-title">अपनी समीक्षा दें</h2>
+<div class="review-form"><input id="rName" placeholder="आपका नाम"><textarea id="rText" rows="3" placeholder="आपकी सलाह"></textarea><button class="btn-primary" onclick="submitReview()">भेजें</button></div>
+<div id="reviewList" style="max-width:600px;margin:15px auto"></div>
+</section>
+
+<section id="contact" class="tab">
+<h2 class="section-title">संपर्क करें</h2>
+<div class="contact-card"><p><b>Mobile:</b> 7748099814<br><b>Email:</b> dctckcg491881@gmail.com</p>
+<a href="https://wa.me/917748099814" target="_blank" class="btn-primary" style="background:#25D366;margin-top:10px">💬 WhatsApp - 7748099814</a>
+<a href="tel:+917748099814" class="btn-primary" style="background:#007bff;margin-top:10px">📞 Call</a>
+<a href="mailto:dctckcg491881@gmail.com" class="btn-primary" style="background:#EA4335;margin-top:10px">✉️ Email</a>
+</div>
+</section>
+
+<div id="gateModal" class="modal"><div class="modal-box"><h3>जानकारी भरें</h3><input id="dName" style="width:100%;padding:11px;margin:6px 0;border:1px solid #ccc;border-radius:8px" placeholder="पूरा नाम"><input id="dMobile" style="width:100%;padding:11px;margin:6px 0;border:1px solid #ccc;border-radius:8px" placeholder="मोबाइल 10 अंक" maxlength="10"><button class="btn-primary" onclick="confirmDownload()">अब देखें</button><button style="width:100%;margin-top:8px;padding:8px;border:none;background:#eee;border-radius:8px" onclick="closeGate()">रद्द करें</button></div></div>
+
+<div id="pdfModal" class="modal"><div class="modal-box large"><span onclick="closePdf()" style="float:right;font-size:28px;cursor:pointer">&times;</span><h3 id="pdfViewerTitle"></h3><div id="pdfContainer" style="margin:15px 0;max-height:60vh;overflow-y:auto;background:#eee;padding:10px;border-radius:8px"></div>
+<a id="pdfDownloadLink" class="btn-primary" download style="background:#0b2e65;text-align:center;display:block">📥 Download PDF</a>
+<button onclick="sharePdf()" class="btn-primary" style="background:#25D366;margin-top:8px">📤 Share (WhatsApp, Telegram, Gmail...)</button>
+</div></div>
+
+<footer>© 2026 Deva Computer Typing Center | 7748099814 | <a href="typing.html" style="color:#ff8c00;text-decoration:none;">Typing Test</a></footer>
+
+<script src="app.js"></script>
+</body>
+</html>

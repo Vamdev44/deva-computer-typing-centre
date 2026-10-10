@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Deva Typing</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.main-header{background:#0b2e65;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;position:fixed;top:0;left:0;right:0;z-index:300;height:58px}
+.home-btn{background:#ff8c00;color:#000!important;padding:7px 16px;border-radius:8px;font-weight:700;text-decoration:none}
+.card{background:#fff;padding:18px;border-radius:12px;max-width:900px;margin:15px auto;box-shadow:0 2px 10px #0001}
+.card input,.card select,.card textarea{width:100%;padding:11px;margin:6px 0;border:1px solid #ccc;border-radius:8px;font-family:inherit}
+.btn{background:#0b2e65;color:#fff;padding:11px;border:none;border-radius:8px;width:100%;margin-top:8px;cursor:pointer;font-weight:700}
+.btn-logout{background:#ff3b3b;color:#fff;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:700}
+.btn-del{background:#ff3b3b;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;margin-left:6px}
+.admin-wrap{margin-top:70px;padding:15px}
+#loginScreen{position:fixed;inset:0;background:#0b2e65;z-index:1000;display:flex;justify-content:center;align-items:center}
+.login-box{background:#fff;padding:22px;border-radius:14px;width:100%;max-width:360px;text-align:center}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;text-align:left}th{background:#0b2e65;color:#fff}
+.section-title{color:#0b2e65;margin:22px 0 10px 0;border-left:5px solid #ff8c00;padding-left:10px}
+</style>
+</head>
+<body>
+<div class="main-header"><div class="logo">Deva Computer <span>Admin</span></div><div style="display:flex;gap:10px"><a href="index.html" class="home-btn">🏠 Home</a><button class="btn-logout" onclick="logout()">Logout</button></div></div>
+<div id="loginScreen"><div class="login-box"><h2 style="color:#0b2e65">Admin Login</h2><input id="adminId" placeholder="Admin ID"><input id="adminPass" type="password" placeholder="Password"><button class="btn" onclick="login()">Login</button><p id="loginErr" style="color:red"></p></div></div>
+<div class="admin-wrap">
+<h2 class="section-title">📁 Folder Manage</h2><div class="card"><input id="fName" placeholder="Naya Folder"><button class="btn" onclick="addFolder()">Add</button><div id="fList" style="margin-top:10px"></div></div>
+<h2 class="section-title">📄 PDF Upload</h2><div class="card"><select id="pFolder"></select><input id="pName" placeholder="PDF Naam"><input id="pFile" type="file" accept=".pdf"><button class="btn" onclick="uploadPdf()">Upload</button><p id="status"></p><hr style="margin:12px 0"><input type="file" id="bulkFolderInput" webkitdirectory directory multiple><p id="bulkStatus"></p><div id="bulkProgress" style="display:none;background:#eee;border-radius:20px;overflow:hidden;margin-top:8px"><div id="bulkBar" style="height:12px;width:0%;background:#0b2e65"></div></div></div>
+<div class="card"><h3>All PDFs</h3><div id="pdfList"></div></div>
+
+<h2 class="section-title">⌨️ Typing Matters (Title ke saath)</h2>
+<div class="card">
+<p style="font-size:13px;color:#555">Ab aap Title + Matter dono daal sakte ho</p>
+<select id="tmLang" onchange="renderTmList()">
+<option value="english">English</option>
+<option value="mangal">Hindi - Mangal</option>
+<option value="krutidev">Hindi - KrutiDev 010</option>
+</select>
+<input id="tmTitle" placeholder="Matter ka Title - Ex: Lesson 1 - Computer Basic, Exercise 5">
+<textarea id="tmText" rows="5" placeholder="Yahan Text Matter likho..."></textarea>
+<button class="btn" onclick="addTypingMatter()">Typing Matter Add Karo</button>
+<div id="tmList" style="margin-top:12px;max-height:350px;overflow-y:auto"></div>
+</div>
+
+<h2 class="section-title">📥 PDF Logs</h2><div class="card"><button class="btn" style="width:auto;background:#25D366" onclick="exportLogs()">CSV Export</button><button class="btn" style="width:auto;background:#ff3b3b" onclick="clearLogs()">Clear</button><table style="margin-top:10px"><thead><tr><th>Date</th><th>Name</th><th>Mobile</th><th>PDF</th></tr></thead><tbody id="logBody"></tbody></table></div>
+<h2 class="section-title">📊 Typing Logs</h2><div class="card"><button class="btn" style="width:auto;background:#25D366" onclick="exportTypingLogs()">Typing CSV</button><button class="btn" style="width:auto;background:#ff3b3b" onclick="clearTypingLogs()">Clear Typing Logs</button><table style="margin-top:10px;font-size:13px"><thead><tr><th>Date</th><th>Name</th><th>Mobile</th><th>Lang</th><th>Matter Title</th><th>WPM</th><th>Acc</th></tr></thead><tbody id="typingLogBody"></tbody></table></div>
+<h2 class="section-title">⭐ Reviews</h2><div class="card"><div id="reviewAdminList"></div></div>
+<h2 class="section-title">🔑 Change Login</h2><div class="card"><input id="newId" placeholder="New ID"><input id="newPass" placeholder="New Pass"><button class="btn" onclick="changeCreds()">Update</button></div>
+</div>
+<script src="admin.js"></script>
+<script>
+const TM_KEY='deva_typing_matters', TR_KEY='deva_typing_results';
+function getMatters(){
+  let d=JSON.parse(localStorage.getItem(TM_KEY)||'null');
+  if(!d){d={english:[],mangal:[],krutidev:[]}; localStorage.setItem(TM_KEY,JSON.stringify(d)); return d;}
+  // purane string wale data ko object me convert karo
+  for(let k in d){d[k]=d[k].map(it=>{if(typeof it==='string')return{id:Date.now()+Math.random(),title:it.slice(0,30)+'...',text:it};return it;});}
+  return d;
+}
+function addTypingMatter(){
+  let lang=document.getElementById('tmLang').value;
+  let title=document.getElementById('tmTitle').value.trim();
+  let txt=document.getElementById('tmText').value.trim();
+  if(!title)return alert('Title likho - Ex: Lesson 1');
+  if(!txt)return alert('Matter Text likho');
+  let m=getMatters();
+  m[lang].push({id:Date.now().toString(),title:title,text:txt});
+  localStorage.setItem(TM_KEY,JSON.stringify(m));
+  document.getElementById('tmTitle').value='';document.getElementById('tmText').value='';
+  renderTmList(); alert('Matter Add ho gaya!');
+}
+function renderTmList(){
+  let m=getMatters();let lang=document.getElementById('tmLang').value;let list=m[lang]||[];
+  document.getElementById('tmList').innerHTML=list.map((t,i)=>`<div style="display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:10px 0"><div style="width:80%"><b>${t.title}</b><br><span style="font-size:12px;color:#666;word-break:break-all">${t.text.slice(0,90)}...</span></div><button class="btn-del" onclick="delTm('${lang}',${i})">Delete</button></div>`).join('')||'Is language me koi matter nahi';
+}
+function delTm(lang,i){if(!confirm('Delete?'))return;let m=getMatters();m[lang].splice(i,1);localStorage.setItem(TM_KEY,JSON.stringify(m));renderTmList();}
+function loadTypingLogs(){let logs=JSON.parse(localStorage.getItem(TR_KEY)||'[]');document.getElementById('typingLogBody').innerHTML=logs.slice(-200).reverse().map(l=>`<tr><td>${l.date}</td><td>${l.name}</td><td>${l.mobile}</td><td>${l.lang}</td><td>${l.matterTitle||'-'}</td><td><b>${l.wpm}</b></td><td>${l.acc}</td></tr>`).join('')||'<tr><td colspan=7>Koi log nahi</td></tr>';}
+function exportTypingLogs(){let logs=JSON.parse(localStorage.getItem(TR_KEY)||'[]');if(!logs.length)return alert('Koi data nahi');let csv='Date,Name,Mobile,Language,MatterTitle,WPM,Accuracy,Errors\n'+logs.map(l=>`"${l.date}","${l.name}","${l.mobile}","${l.lang}","${(l.matterTitle||'').replace(/"/g,'') }","${l.wpm}","${l.acc}","${l.errors}"`).join('\n');let blob=new Blob([csv],{type:'text/csv'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='typing_logs.csv';a.click();}
+function clearTypingLogs(){if(!confirm('Delete?'))return;localStorage.removeItem(TR_KEY);loadTypingLogs();}
+document.addEventListener('DOMContentLoaded',()=>{renderTmList();loadTypingLogs();setInterval(loadTypingLogs,3000);});
+</script>
+</body>
+</html>

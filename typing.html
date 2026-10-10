@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typing Test - DCTC</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans Devanagari',sans-serif;background:#f6f7fb}
+header{position:sticky;top:0;z-index:10;background:#0b2e65;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:700;font-size:20px}.logo span{color:#ff8c00}nav ul{display:flex;gap:8px;list-style:none}nav a{color:#fff;text-decoration:none;padding:6px 10px;border-radius:6px;font-size:14px}.admin-btn{background:#ff8c00;color:#000!important}
+@font-face{font-family:'KrutiDev010';src:local('Kruti Dev 010')}
+.wrap{max-width:1000px;margin:18px auto;padding:0 12px;display:grid;grid-template-columns:280px 1fr;gap:14px}
+@media(max-width:800px){.wrap{grid-template-columns:1fr}}
+.left,.box{background:#fff;border-radius:14px;box-shadow:0 6px 20px #0001;border:1px solid #e2e8f0;overflow:hidden}
+.left h3,.top h2{font-size:16px;padding:14px 16px;background:#0b2e65;color:#fff;margin:0}
+.matter-list{max-height:65vh;overflow-y:auto}
+.m-item{padding:12px 14px;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.m-item:hover{background:#fff7ed}.m-item.active{background:#ffedd5;border-left:4px solid #ff8c00}
+.m-item.t{font-weight:700;font-size:14px}.m-item.d{font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.done{color:#16a34a;font-weight:800}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 14px;background:#0b2e65;color:#fff}
+.ctrl{display:flex;gap:6px}.ctrl select{padding:7px 8px;border-radius:6px;border:none;font-weight:700;font-size:13px}.start{background:#ff8c00;color:#000;border:none;padding:8px 14px;border-radius:6px;font-weight:800;cursor:pointer}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);background:#f8fafc;border-bottom:1px solid #e2e8f0}
+.s{text-align:center;padding:12px 5px;border-right:1px solid #e2e8f0}.s b{display:block;font-size:22px;color:#0b2e65}.s span{font-size:11px;color:#64748b}
+.display{padding:20px 22px;min-height:200px;line-height:2.2;font-size:20px;word-spacing:3px}.display.krutidev{font-family:'KrutiDev010',monospace;font-size:24px}
+#input{width:94%;margin:0 3% 12px 3%;height:110px;padding:10px;border:2px solid #0b2e65;border-radius:10px;font-size:17px;outline:none}
+#input.krutidev{font-family:'KrutiDev010',monospace}
+.modal{display:none;position:fixed;inset:0;background:#0008;justify-content:center;align-items:center;z-index:50;padding:12px}.modal-box{background:#fff;padding:18px;border-radius:12px;width:100%;max-width:400px}.modal-box.large{max-width:500px;text-align:center}.modal-box input{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc;border-radius:6px}
+.btn{width:100%;padding:10px;border:none;border-radius:8px;margin-top:8px;font-weight:700;cursor:pointer;display:block;text-decoration:none;text-align:center}.p1{background:#0b2e65;color:#fff}.p2{background:#25D366;color:#fff}.p3{background:#ff8c00;color:#000}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.rc{background:#eef2ff;padding:8px;border-radius:8px}.rc b{display:block;font-size:18px;color:#0b2e65}
+.correct{color:#15803d;background:#dcfce7}.incorrect{color:#fff;background:#ef4444}.current{border-bottom:3px solid #2563eb;background:#dbeafe}.upcoming{color:#94a3b8}
+</style>
+</head>
+<body>
+<header><div class="logo">Deva <span>Typing</span></div><nav><ul><li><a href="index.html">होम</a></li><li><a href="admin.html" class="admin-btn">Admin</a></li></ul></nav></header>
+
+<div class="wrap">
+<div class="left"><h3>📚 <span id="langLabel">English</span> Matters</h3><div id="matterList" class="matter-list">Loading...</div></div>
+<div class="box">
+<div class="top"><div style="font-weight:700" id="selectedTitle">Koi Matter Select Karo</div><div class="ctrl"><select id="tLang" onchange="changeLang()"><option value="english">English</option><option value="mangal">Mangal</option><option value="krutidev">KrutiDev</option></select><select id="tTime"><option value="60">1 Min</option><option value="300" selected>5 Min</option><option value="600">10 Min</option></select><button class="start" onclick="openUserModal()">Start</button></div></div>
+<div class="stats"><div class="s"><b id="wpm">0</b><span>WPM</span></div><div class="s"><b id="acc">100%</b><span>Acc</span></div><div class="s"><b id="timeLeft">05:00</b><span>Time</span></div><div class="s"><b id="err">0</b><span>Err</span></div></div>
+<div id="typingDisplay" class="display">Baye taraf se koi title select karo...</div>
+<textarea id="input" placeholder="Yahan type karo..." disabled></textarea>
+</div>
+</div>
+
+<div id="userModal" class="modal"><div class="modal-box"><h3>जानकारी भरें</h3><input id="uName" placeholder="नाम *"><input id="uMobile" placeholder="मोबाइल 10 अंक *" maxlength="10"><button class="btn p1" onclick="startTestWithUser()">Start Test</button><button class="btn" style="background:#eee" onclick="closeUserModal()">Cancel</button></div></div>
+<div id="resultModal" class="modal"><div class="modal-box large"><h2>🎉 Result</h2><p id="rNameShow"></p><div class="grid"><div class="rc"><b id="rWpm">0</b>WPM</div><div class="rc"><b id="rAcc">0%</b>Acc</div><div class="rc"><b id="rErr">0</b>Err</div><div class="rc"><b id="rChar">0</b>Chars</div></div><p id="rTitleShow" style="background:#fff7ed;padding:8px;border-radius:8px;font-size:13px;margin:8px 0"></p><p id="rLinkBox" style="font-size:11px;word-break:break-all;background:#f1f5f9;padding:6px;border-radius:6px"></p><button class="btn p2" onclick="shareResult()">📤 Share</button><button class="btn p3" onclick="downloadResultPdf()">📥 PDF</button><button class="btn p1" onclick="location.reload()">Next Test</button></div></div>
+
+<script>
+const TM_KEY='deva_typing_matters', TR_KEY='deva_typing_results', DONE_KEY='deva_done_matters';
+function getMatters(){
+  let d=JSON.parse(localStorage.getItem(TM_KEY)||'null');
+  if(!d){d={english:[{id:'e1',title:'Lesson 1 - Computer Basic',text:'Computer is an electronic device that processes data and gives information.'}],mangal:[{id:'m1',title:'पाठ 1 - कंप्यूटर परिचय',text:'कंप्यूटर एक इलेक्ट्रॉनिक मशीन है।'}],krutidev:[{id:'k1',title:'ikB 1 - deokj iqj ifjp;',text:'deokj iqj,d bysDVªkfud e\'khu gS'}]};localStorage.setItem(TM_KEY,JSON.stringify(d));}
+  for(let k in d){d[k]=d[k].map(it=>typeof it==='string'?{id:Date.now()+Math.random(),title:it.slice(0,30),text:it}:it);}
+  return d;
+}
+function getDone(){return JSON.parse(localStorage.getItem(DONE_KEY)||'[]')}
+function markDone(id){let a=getDone();if(!a.includes(id)){a.push(id);localStorage.setItem(DONE_KEY,JSON.stringify(a));}}
+
+let currentMatter=null,timer=null,timeLeft=300,totalTyped=0,errors=0,isActive=false,currentUser={};
+const display=document.getElementById('typingDisplay'),input=document.getElementById('input');
+function changeLang(){renderMatterList();}
+function renderMatterList(){
+  let lang=document.getElementById('tLang').value;
+  document.getElementById('langLabel').innerText=lang;
+  let matters=getMatters()[lang]||[];let done=getDone();
+  document.getElementById('matterList').innerHTML=matters.map(m=>`<div class="m-item ${currentMatter&&currentMatter.id==m.id?'active':''}" onclick="selectMatter('${m.id}')"><div><div class="t">${m.title}</div><div class="d">${m.text.slice(0,50)}...</div></div><div class="${done.includes(m.id)?'done':' ' }">${done.includes(m.id)?'✓':'○'}</div></div>`).join('')||'<div style="padding:20px;text-align:center;color:#888">Koi matter nahi - Admin me add karo</div>';
+}
+function selectMatter(id){
+  let lang=document.getElementById('tLang').value;
+  let matters=getMatters()[lang]||[];
+  currentMatter=matters.find(x=>x.id==id);
+  if(!currentMatter)return;
+  document.getElementById('selectedTitle').innerText=currentMatter.title;
+  renderText(); renderMatterList();
+}
+function formatTime(s){let m=Math.floor(s/60).toString().padStart(2,'0'),sec=(s%60).toString().padStart(2,'0');return `${m}:${sec}`}
+function openUserModal(){if(!currentMatter)return alert('Pehle baye taraf se koi Title select karo');document.getElementById('userModal').style.display='flex'}
+function closeUserModal(){document.getElementById('userModal').style.display='none'}
+function startTestWithUser(){let n=document.getElementById('uName').value.trim(),mob=document.getElementById('uMobile').value.trim();if(n.length<2||mob.length<10)return alert('Naam/Mobile bharo');currentUser={name:n,mobile:mob,date:new Date().toLocaleString()};closeUserModal();startTest();}
+function startTest(){clearInterval(timer);timeLeft=parseInt(document.getElementById('tTime').value);totalTyped=0;errors=0;isActive=true;input.value='';input.disabled=false;input.focus();document.getElementById('timeLeft').textContent=formatTime(timeLeft);timer=setInterval(()=>{timeLeft--;document.getElementById('timeLeft').textContent=formatTime(timeLeft);calc();if(timeLeft<=0)endTest();},1000);}
+function renderText(){let lang=document.getElementById('tLang').value;display.className='display '+lang;input.className=lang;display.innerHTML='';[...currentMatter.text].forEach((ch,i)=>{let s=document.createElement('span');s.textContent=ch;s.className=i==0?'current':'upcoming';display.appendChild(s);});}
+input.addEventListener('input',()=>{if(!isActive)return;let typed=input.value;totalTyped=typed.length;let spans=display.querySelectorAll('span');errors=0;spans.forEach((sp,i)=>{if(i<typed.length){if(typed[i]==sp.textContent){sp.className='correct'}else{sp.className='incorrect';errors++}}else if(i==typed.length){sp.className='current'}else{sp.className='upcoming'}});document.getElementById('err').textContent=errors;calc();});
+function calc(){let elapsed=parseInt(document.getElementById('tTime').value)-timeLeft;if(elapsed==0)elapsed=1;let wpm=Math.round((totalTyped/5)/(elapsed/60));let acc=totalTyped>0?Math.round(((totalTyped-errors)/totalTyped)*100):100;document.getElementById('wpm').textContent=wpm>0?wpm:0;document.getElementById('acc').textContent=acc+'%';}
+function endTest(){clearInterval(timer);isActive=false;input.disabled=true;let wpm=document.getElementById('wpm').textContent,acc=document.getElementById('acc').textContent;let result={id:Date.now().toString(),...currentUser,lang:document.getElementById('tLang').value,matterTitle:currentMatter.title,matterId:currentMatter.id,wpm,acc,errors,chars:totalTyped,time:document.getElementById('tTime').value};let all=JSON.parse(localStorage.getItem(TR_KEY)||'[]');all.push(result);localStorage.setItem(TR_KEY,JSON.stringify(all));markDone(currentMatter.id);showResult(result);}
+function showResult(r){document.getElementById('rNameShow').innerText=r.name+' - '+r.mobile;document.getElementById('rWpm').innerText=r.wpm;document.getElementById('rAcc').innerText=r.acc;document.getElementById('rErr').innerText=r.errors;document.getElementById('rChar').innerText=r.chars;document.getElementById('rTitleShow').innerText='Matter: '+r.matterTitle;let link=location.href.split('?')[0]+'?result='+r.id;document.getElementById('rLinkBox').innerText=link;document.getElementById('resultModal').style.display='flex';window.currentResult=r;}
+function shareResult(){let r=window.currentResult;let txt=`${r.name} - ${r.matterTitle} - WPM:${r.wpm} ${r.acc} - ${location.href}`;window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`);}
+function downloadResultPdf(){let r=window.currentResult;const{jsPDF}=window.jspdf;let doc=new jsPDF();doc.text('DCTC Typing Result',20,20);doc.text(`Name:${r.name}`,20,35);doc.text(`Matter:${r.matterTitle}`,20,45);doc.text(`WPM:${r.wpm} Acc:${r.acc}`,20,55);doc.save(`${r.name}-${r.matterTitle}.pdf`);}
+window.addEventListener('load',()=>{renderMatterList();});
+</script>
+</body>
+</html>
