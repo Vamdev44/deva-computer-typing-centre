@@ -6,8 +6,8 @@
 <title>Deva Computer Typing Center</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<!-- WATERMARK KE LIYE -->
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script type="importmap">{"imports":{"firebase/app":"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js","firebase/firestore":"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"}}</script>
 </head>
 <body>
 
@@ -28,27 +28,33 @@
 <section id="home" class="tab active">
 <div class="hero">
 <h1>देवा कंप्यूटर टाइपिंग सेंटर - ई-बुक लाइब्रेरी</h1>
-<!-- NAYA TYPING TEST BUTTON -->
 <a href="typing.html" class="btn-primary" style="max-width:340px;margin:18px auto 0 auto;background:#ff8c00;color:#000;font-size:16px">⌨️ Free Typing Test Start Kare - English / KrutiDev / Mangal</a>
 </div>
-
 <h2 class="section-title">Browse by Folder</h2>
 <div id="folderListHome" class="folder-grid"></div>
-
-<h2 class="section-title">Recent PDFs</h2>
+<h2 class="section-title">Recent PDFs <span style="background:#00c851;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">LIVE</span></h2>
 <div id="recentPdfs" class="pdf-grid"></div>
+<div id="recentPdfsLive" class="pdf-grid" style="margin-top:10px"></div>
 </section>
 
 <section id="library" class="tab">
 <h2 class="section-title">सभी फोल्डर और ई-बुक्स</h2>
 <div id="folderListLib" class="folder-grid"></div>
 <div id="pdfList" class="pdf-grid"></div>
+<div id="pdfListLive" class="pdf-grid"></div>
 </section>
 
 <section id="reviews" class="tab">
-<h2 class="section-title">अपनी समीक्षा दें</h2>
-<div class="review-form"><input id="rName" placeholder="आपका नाम"><textarea id="rText" rows="3" placeholder="आपकी सलाह"></textarea><button class="btn-primary" onclick="submitReview()">भेजें</button></div>
+<h2 class="section-title">अपनी समीक्षा दें <span style="background:#00c851;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">LIVE</span></h2>
+<div class="review-form">
+<input id="rName" placeholder="आपका नाम">
+<select id="rRating" style="width:100%;padding:11px;margin:6px 0;border:1px solid #ccc;border-radius:8px"><option value="5">⭐⭐⭐⭐⭐ 5 Star</option><option value="4">⭐⭐⭐⭐ 4 Star</option><option value="3">⭐⭐⭐ 3 Star</option><option value="2">⭐⭐ 2 Star</option><option value="1">⭐ 1 Star</option></select>
+<textarea id="rText" rows="3" placeholder="आपकी सलाह"></textarea>
+<button class="btn-primary" onclick="submitReview()">भेजें</button>
+<p id="rStatus" style="font-size:13px;color:green"></p>
+</div>
 <div id="reviewList" style="max-width:600px;margin:15px auto"></div>
+<div id="reviewListLive" style="max-width:600px;margin:15px auto"></div>
 </section>
 
 <section id="contact" class="tab">
@@ -70,5 +76,52 @@
 <footer>© 2026 Deva Computer Typing Center | 7748099814 | <a href="typing.html" style="color:#ff8c00;text-decoration:none;">Typing Test</a></footer>
 
 <script src="app.js"></script>
+<script type="module">
+import {initializeApp} from "firebase/app"; import {getFirestore,collection,addDoc,serverTimestamp,query,orderBy,onSnapshot} from "firebase/firestore";
+const firebaseConfig={apiKey:"AIzaSyBrbk1SVhXsiBYWlYvf0fDkrl6_ZX1Kwro",authDomain:"deva-computer-typing-centre.firebaseapp.com",projectId:"deva-computer-typing-centre",storageBucket:"deva-computer-typing-centre.firebasestorage.app",messagingSenderId:"929826218031",appId:"1:929826218031:web:56f632b060130c85fb66da"};
+const db=getFirestore(initializeApp(firebaseConfig));
+
+// LIVE REVIEW SUBMIT
+window.submitReview = async () => {
+  const name=document.getElementById('rName').value.trim();
+  const rating=document.getElementById('rRating').value;
+  const message=document.getElementById('rText').value.trim();
+  if(!name||!message) return alert('Naam aur Samiksha likho');
+  document.getElementById('rStatus').innerText='Bhej rahe hain...';
+  try{
+    await addDoc(collection(db,"reviews"),{name,rating:parseInt(rating),message,createdAt:serverTimestamp()});
+    document.getElementById('rStatus').innerText='✅ Dhanyawad! Review Live ho gaya';
+    document.getElementById('rName').value=''; document.getElementById('rText').value='';
+    // purana local function bhi call karo agar hai
+    if(window.oldSubmitReview) window.oldSubmitReview();
+  }catch(e){document.getElementById('rStatus').innerText='Error: '+e.message}
+};
+
+// LIVE REVIEWS SHOW
+const qR=query(collection(db,"reviews"),orderBy("createdAt","desc"));
+onSnapshot(qR,snap=>{
+  const el=document.getElementById('reviewListLive');
+  if(!el) return;
+  el.innerHTML='';
+  snap.forEach(d=>{
+    const r=d.data();
+    el.innerHTML+=`<div style="background:#fff;padding:12px;margin:8px 0;border-radius:10px;box-shadow:0 2px 6px #0001;border-left:4px solid #00c851"><b>${r.name}</b> <span style="color:#ff8c00">${'⭐'.repeat(r.rating||5)}</span><br><span style="font-size:14px">${r.message}</span></div>`;
+  });
+});
+
+// LIVE PDFs SHOW
+const qP=query(collection(db,"pdfs"),orderBy("createdAt","desc"));
+onSnapshot(qP,snap=>{
+  const home=document.getElementById('recentPdfsLive');
+  const lib=document.getElementById('pdfListLive');
+  if(home) home.innerHTML=''; if(lib) lib.innerHTML='';
+  snap.forEach(d=>{
+    const p=d.data();
+    const card=`<div class="pdf-card" style="background:#fff;padding:12px;border-radius:10px;box-shadow:0 2px 8px #0001"><b>${p.name}</b><br><small style="color:green">🔥 Live</small><br><a href="${p.url}" target="_blank" class="btn-primary" style="margin-top:8px;padding:6px 10px;font-size:13px">📄 View / Download</a></div>`;
+    if(home) home.innerHTML+=card;
+    if(lib) lib.innerHTML+=card;
+  });
+});
+</script>
 </body>
 </html>
