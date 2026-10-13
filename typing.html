@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Typing Test - DCTC</title>
+<title>Typing Test - DCTC v7 Scrollbar</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -13,60 +13,84 @@ header{position:sticky;top:0;z-index:10;background:#0b2e65;color:#fff;padding:14
 .wrap{max-width:1000px;margin:18px auto;padding:0 12px;display:grid;grid-template-columns:280px 1fr;gap:14px}
 @media(max-width:800px){.wrap{grid-template-columns:1fr}}
 .left,.box{background:#fff;border-radius:14px;box-shadow:0 6px 20px #0001;border:1px solid #e2e8f0;overflow:hidden}
-.left h3,.top h2{font-size:16px;padding:14px 16px;background:#0b2e65;color:#fff;margin:0}
+.left h3{font-size:16px;padding:14px 16px;background:#0b2e65;color:#fff}
 .matter-list{max-height:65vh;overflow-y:auto}
 .m-item{padding:12px 14px;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .m-item:hover{background:#fff7ed}.m-item.active{background:#ffedd5;border-left:4px solid #ff8c00}
-.m-item.t{font-weight:700;font-size:14px}.m-item.d{font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 .done{color:#16a34a;font-weight:800}
 .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 14px;background:#0b2e65;color:#fff}
 .ctrl{display:flex;gap:6px}.ctrl select{padding:7px 8px;border-radius:6px;border:none;font-weight:700;font-size:13px}.start{background:#ff8c00;color:#000;border:none;padding:8px 14px;border-radius:6px;font-weight:800;cursor:pointer}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);background:#f8fafc;border-bottom:1px solid #e2e8f0}
 .s{text-align:center;padding:12px 5px;border-right:1px solid #e2e8f0}.s b{display:block;font-size:22px;color:#0b2e65}.s span{font-size:11px;color:#64748b}
-.display{padding:20px 22px;min-height:200px;line-height:2.2;font-size:20px;word-spacing:3px}.display.krutidev{font-family:'KrutiDev010',monospace;font-size:24px}
-#input{width:94%;margin:0 3% 12px 3%;height:110px;padding:10px;border:2px solid #0b2e65;border-radius:10px;font-size:17px;outline:none}
-#input.krutidev{font-family:'KrutiDev010',monospace}
+.display{padding:20px 22px;height:150px;line-height:2.2;font-size:20px;word-spacing:5px;white-space:pre-wrap;overflow-y:auto;scroll-behavior:smooth;border-bottom:2px solid #e2e8f0;background:#fffffe}
+.display::-webkit-scrollbar{width:8px}.display::-webkit-scrollbar-thumb{background:#0b2e65;border-radius:10px}.display::-webkit-scrollbar-track{background:#f1f5f9}
+.display.krutidev{font-family:'KrutiDev010',monospace;font-size:23px}
+.word{display:inline-block;margin:2px 4px;padding:2px 4px;border-radius:4px;transition:all 0.2s}
+.word.current{background:#dbeafe;border-bottom:3px solid #2563eb;animation:blink 1s infinite}
+@keyframes blink{0%,50%{border-color:#2563eb}51%,100%{border-color:transparent}}
+.word.typed-correct{color:#15803d;background:#dcfce7}
+.word.typed-incorrect{color:#fff;background:#ef4444}
+#input{width:94%;margin:12px 3%;height:95px;max-height:150px;overflow-y:auto;padding:10px;border:2px solid #0b2e65;border-radius:10px;font-size:17px;outline:none;resize:vertical}
+#input::-webkit-scrollbar{width:8px}#input::-webkit-scrollbar-thumb{background:#ff8c00;border-radius:10px}
 .modal{display:none;position:fixed;inset:0;background:#0008;justify-content:center;align-items:center;z-index:50;padding:12px}.modal-box{background:#fff;padding:18px;border-radius:12px;width:100%;max-width:400px}.modal-box.large{max-width:500px;text-align:center}.modal-box input{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc;border-radius:6px}
-.btn{width:100%;padding:10px;border:none;border-radius:8px;margin-top:8px;font-weight:700;cursor:pointer;display:block;text-decoration:none;text-align:center}.p1{background:#0b2e65;color:#fff}.p2{background:#25D366;color:#fff}.p3{background:#ff8c00;color:#000}
+.btn{width:100%;padding:10px;border:none;border-radius:8px;margin-top:8px;font-weight:700;cursor:pointer}.p1{background:#0b2e65;color:#fff}.p2{background:#25D366;color:#fff}.p3{background:#ff8c00;color:#000}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.rc{background:#eef2ff;padding:8px;border-radius:8px}.rc b{display:block;font-size:18px;color:#0b2e65}
-.correct{color:#15803d;background:#dcfce7}.incorrect{color:#fff;background:#ef4444}.current{border-bottom:3px solid #2563eb;background:#dbeafe}.upcoming{color:#94a3b8}
 </style>
 </head>
 <body>
+<textarea id="defaultMangalText" style="display:none;">प्रधानमंत्री ने कोलकाता के श्यामा प्रसाद मुखर्जी बंदरगाह पर जिन तीन नौसैनिक जहाजों आइएनएस दूनागिरी, आइएनएस संशोधक और आइएनएस अग्रय का शुभारंभ किया, उनकी विशेषता यह है कि वे स्वदेशी रूप से डिजाइन और निर्मित हैं। निःसंदेह यह एक उपलब्धि है और इस बात को रेखांकित करती है कि भारत को रक्षा क्षेत्र में अब केवल खरीदार बनकर नहीं रहना चाहिए, बल्कि उसे अपनी आवश्यकता की अधिकाधिक रक्षा सामग्री का उत्पादन देश में ही करना होगा। यह इसलिए आवश्यक है कि वर्तमान में किसी भी देश की सैन्य शक्ति का आकलन केवल इससे नहीं किया जाता कि उसके पास कैसे और कितने हथियार हैं, बल्कि इससे अधिक किया जाता है कि वह अपने स्तर पर रक्षा सामग्री का कितना अधिक निर्माण करता है? यदि भारत को आत्मनिर्भर बनना है तो उसके दायरे में रक्षा सामग्री अनिवार्य रूप से आनी चाहिए। यह ठीक नहीं कि भारत अभी भी रक्षा सामग्री के एक प्रमुख आयातक देश के रूप में जाना जाता है। अच्छी बात यह है कि धीर-धीरे इस स्थिति में परिवर्तन हो रहा है। यह महत्वपूर्ण है कि पिछले कुछ वर्षों में 40 से अधिक स्वदेश निर्मित युद्धपोत और पनडुब्बियाँ भारतीय नौसेना में शामिल की गई हैं। एक समय ऐसा था जब भारत अपनी हर छोटी-बड़ी रक्षा सामग्री का आयात करता था। इससे रणनीतिक और सुरक्षा संबंधी चुनौतियाँ उत्पन्न होती थीं। यह उल्लेखनीय है कि पिछले लगभग एक दशक में रक्षा सामग्री के स्वदेश में निर्माण को बल मिला है। इसके चलते देश में रक्षा उत्पादन में भी वृद्धि हुई है। जहाँ 2014 में भारत का कुल रक्षा उत्पादन 40 हजार करोड़ रुपये था, वहीं अब यह बढ़कर 1.5 लाख करोड़ रुपये हो गया है। यह रक्षा सामग्री के मामले में आत्मनिर्भरता की रेखांकित तो करता है, लेकिन अभी बहुत कुछ हासिल करना शेष है। कुछ समय पहले तक भारत में ज्यादातर रक्षा सामाग्री का उत्पादन सार्वजनिक क्षेत्र के उपक्रमों में होता था। इसके चलते रक्षा सामग्री के उत्पादन की गति धीमी थी और उन्नत रक्षा सामग्री का निर्माण भी नहीं हो पाता था। यह अच्छा हुआ कि रक्षा सामग्री के निर्माण में निजी क्षेत्र का भी योगदान लेना शुरू किया गया। इसका परिणाम यह है कि पिछले कुछ वर्षों में भारत का रक्षा नियांत भी बढ़ा है और वर्तमान में यह 38 हजार करोड़ तक पहुंच गया है। अब भारतीय रक्षा उत्पाद विश्व के करीब 40 देशों में निर्यात किए जाते हैं। 2029 तक रक्षा नियाँत को 50 हजार करोड़ रुपये तक पहुंचाने का लक्ष्य रखा है, लेकिन यह ध्यान रखना चाहिए कि देश में रक्षा सामग्री के उत्पादन की कई परियोजनाएं लंबित चल रही हैं। इनके कारणों की पहचान कर उनका प्राथमिकता के आधार निवारण किया जाना चाहिए।</textarea>
+<textarea id="defaultKrutidevText" style="display:none;">vesfjdk vkSj bZjku ds chp fLoV~tjySaM ds ctk; Ýkal esa le; ls igys varfje 'kkafr le>kSrs ij gLrk{kj gksus ls mlds ykxw gksus dk jkLrk rks lkQ gks x;k] ysfdu ;g Hkfo"; gh crk,xk fd ;g le>kSrk if'pe,f'k;k esa LFkk;h 'kkafr dk ekxZ okLro esa ç'kLr dj ik,xk ;k ugha\ ;g ç'u blfy,] D;ksafd btjk;y bl le>kSrs ls [kq'k ughaA ;g dguk Hkh dfBu gS fd btjk;y ds lkFk bZjku Hkh le>kSrs ds vuq:i vkpj.k djsxkA ;fn bZjku fgtcqYyk vkSj gkmrh tSls laxBuksa dks btjk;y dks fu'kkuk cukus ds fy, mdlkrk gS rks bl le>kSrs dk VwVuk r; gSA ;g vesfjdk dh detksjh dk gh çek.k gS fd og bZjku ij blds fy, ncko ugha cuk ik;k fd og btjk;y ds fy, [krjk cus fgtcqYyk vkSj gkmrh tSls laxBuksa dh enn djuk can djsA ;s nksuksa laxBu,d rjg ls bZjku dh Nn~e lsuk,a gh gSaA varfje le>kSrs ij gLrk{kj ds ckn vesfjdk vkSj bZjku dh vksj ls viuh&viuh thr dk nkok djuk LokHkkfod gS] D;ksafd nksuksa i{kksa dks viuh turk dks Hkh larq"V djuk gS] ysfdu fQygky bZjku vfèkd ykHk esa fn[k jgk gSA
+vesfjdk vkSj btjk;y us ftu mís';ksa ds fy, chrh 28 Qjojh dks bZjku ij geyk fd;k] os mUgsa gkfly gksrs ugha fn[k jgs gSaA bZjku esa u rks lÙkk ifjoZru gks ldk vkSj u gh mldh?kkrd felkby {kerk u"V gks ikbZA myVs mlus [kkM+h ds ns'kksa esa vesfjdh fBdkuksa ij geys dj bu ns'kksa ds eu esa viuh lqj{kk ds fy, Mj iSnk djus dk dke fd;kA bu geyksa ls bZjku us ;gh lans'k fn;k fd [kkM+h ds ns'k vesfjdh lSU; Nrjh rys lqjf{kr ughaA ;fn vesfjdk vkSj btjk;y ds fy, larks"k dh dksbZ ckr gS rks dsoy ;gh fd bZjku us ijek.kq gfFk;kj u cukus dk oknk fd;k gS] ysfdu blesa lansg gS fd og vius bl bjkns dk lnSo ds fy, ifjR;kx djsxkA 14 fcanqvksa okys varfje le>kSrs ds rgr ;g Hkh r; gqvk gS fd bZjku 60 fnuksa ds fy, gkseZqt leqæh ekxZ [kksy nsxk] ysfdu ;g ç'u vuqÙkfjr gS fd blds ckn D;k gksxk\ ;fn og 60 fnuksa ckn bl leqæh ekxZ ls fudyus okys tgktksa ls VSDl olwyus yxrk gS rks blls vesfjdk dh gsBh gh gksxhA vesfjdk&btjk;y vkSj bZjku ds chp ;q) ds igys ;g leqæh ekxZ lcds fy, [kqyk Fkk] ysfdu vc bZjku ml ij vkfèkiR; pkgrk gSA ;fn og blesa lQy gks tkrk gS rks [kkM+h ns'kksa ds lkFk vesfjdk dks rks >Vdk yxsxk gh] foÜo vFkZO;oLFkk dks Hkh uqdlku gksxk] D;ksafd rsy vkSj xSl ds nke c<+ ldrs gSaA bZjku dks ;g ykHk feyrk Hkh fn[k jgk gS fd vc og viuk rsy cspus ds fy, Lora= gksxkA lkQ gS fd vesfjdk ds fy, nqfu;k dks ;g crkuk dfBu gksxk fd mls bZjku ij geys ls gkfly D;k gqvk\</textarea>
+<textarea id="defaultEnglishText" style="display:none;">Delhi and parts of the surrounding States of Punjab, Haryana and Uttar Pradesh encounter their annual air quality inflection point. This is the time when the southwest monsoon has receded and with it, the great drafts in the upper atmosphere that normally flush out pollutants from the gamut of anthropogenic activities such and construction, driving, power generation and the burning of agricultural residue. Through the years, there have been studies commissioned and executive action initiated to study, acknowledge and address the crisis, the science is also fairly clear on the relative contribution of pollutants and the limits of corrective intervention in the face of adverse meteorology and the disruption to this is that the air pollution crisis has now devolved into a stalemate. The Commission for Air Quality Management (CAQM), which is tasked with addressing the causes of air pollution in Delhi and the adjoining States, is now a body packed with expertise but whose powers are limited to evoking and recommending grades of measures depending on the degree of deterioration in air quality. While the CAQM pointed out, as recently as October 31, that the daily average air quality in Delhi from January to October of this year was the best in the last six years, is elides the fact the number of days in November when air quality becomes 'severe' has remained roughly the same. Thus, in 2022, the AQI was in the severe category in the first fortnight of November for three days, the same as in 2021, 2020 and 2019 while there is greater awareness and action to curb the sources of pollution, November, which has in recent years emerged as the critical month for pollution, remains to be tamed. Incidents of stubble burning in Punjab, Haryana and Uttar Pradesh this year have been roughly half that when compared to previous years, though the weeks ahead are expected to see more such activity. While the measures earlier have seen and institutionalized response to tackle air pollution, it is now time for a concerted approach to address these challenges of November. Beyond stubble burning, this means addressing the more daunting challenges of vehicular pollution and construction dust. While urban Delhi could have always blamed the distant farm fires for the pollution crisis, tackling November may mean hard measures and greater inconvenience.</textarea>
 <header><div class="logo">Deva <span>Typing</span></div><nav><ul><li><a href="index.html">होम</a></li><li><a href="admin.html" class="admin-btn">Admin</a></li></ul></nav></header>
-
 <div class="wrap">
-<div class="left"><h3>📚 <span id="langLabel">English</span> Matters</h3><div id="matterList" class="matter-list">Loading...</div></div>
+<div class="left"><h3>📚 <span id="langLabel">English</span> Matters</h3><div id="matterList" class="matter-list"></div></div>
 <div class="box">
 <div class="top"><div style="font-weight:700" id="selectedTitle">Koi Matter Select Karo</div><div class="ctrl"><select id="tLang" onchange="changeLang()"><option value="english">English</option><option value="mangal">Mangal</option><option value="krutidev">KrutiDev</option></select><select id="tTime"><option value="60">1 Min</option><option value="300" selected>5 Min</option><option value="600">10 Min</option></select><button class="start" onclick="openUserModal()">Start</button></div></div>
 <div class="stats"><div class="s"><b id="wpm">0</b><span>WPM</span></div><div class="s"><b id="acc">100%</b><span>Acc</span></div><div class="s"><b id="timeLeft">05:00</b><span>Time</span></div><div class="s"><b id="err">0</b><span>Err</span></div></div>
-<div id="typingDisplay" class="display">Baye taraf se koi title select karo...</div>
+<div id="typingDisplay" class="display">Please Select a title from left</div>
 <textarea id="input" placeholder="Yahan type karo..." disabled></textarea>
 </div>
 </div>
-
-<div id="userModal" class="modal"><div class="modal-box"><h3>जानकारी भरें</h3><input id="uName" placeholder="नाम *"><input id="uMobile" placeholder="मोबाइल 10 अंक *" maxlength="10"><button class="btn p1" onclick="startTestWithUser()">Start Test</button><button class="btn" style="background:#eee" onclick="closeUserModal()">Cancel</button></div></div>
-<div id="resultModal" class="modal"><div class="modal-box large"><h2>🎉 Result</h2><p id="rNameShow"></p><div class="grid"><div class="rc"><b id="rWpm">0</b>WPM</div><div class="rc"><b id="rAcc">0%</b>Acc</div><div class="rc"><b id="rErr">0</b>Err</div><div class="rc"><b id="rChar">0</b>Chars</div></div><p id="rTitleShow" style="background:#fff7ed;padding:8px;border-radius:8px;font-size:13px;margin:8px 0"></p><p id="rLinkBox" style="font-size:11px;word-break:break-all;background:#f1f5f9;padding:6px;border-radius:6px"></p><button class="btn p2" onclick="shareResult()">📤 Share</button><button class="btn p3" onclick="downloadResultPdf()">📥 PDF</button><button class="btn p1" onclick="location.reload()">Next Test</button></div></div>
-
+<div id="userModal" class="modal"><div class="modal-box"><h3>जानकारी भरें</h3><input id="uName" placeholder="नाम *"><input id="uMobile" placeholder="मोबाइल *" maxlength="10"><button class="btn p1" onclick="startTestWithUser()">Start Test</button><button class="btn" style="background:#eee" onclick="closeUserModal()">Cancel</button></div></div>
+<div id="resultModal" class="modal"><div class="modal-box large"><h2>🎉 Result</h2><p id="rNameShow"></p><div class="grid"><div class="rc"><b id="rWpm">0</b>WPM</div><div class="rc"><b id="rAcc">0%</b>Acc</div><div class="rc"><b id="rErr">0</b>Err</div><div class="rc"><b id="rChar">0</b>Chars</div></div><p id="rTitleShow" style="background:#fff7ed;padding:8px;border-radius:8px;font-size:13px;margin:8px 0"></p><button class="btn p2" onclick="shareResult()">Share</button><button class="btn p3" onclick="downloadResultPdf()">PDF</button><button class="btn p1" onclick="location.reload()">Next</button></div></div>
 <script>
-const TM_KEY='deva_typing_matters', TR_KEY='deva_typing_results', DONE_KEY='deva_done_matters';
+const TM_KEY='deva_typing_matters_v7', TR_KEY='deva_typing_results', DONE_KEY='deva_done_matters';
+function getDefaultMatters(){
+  return {
+    english:[{id:'e1',title:'Practice No. - 1 The Hindu-Editorial',text:document.getElementById('defaultEnglishText').value.trim()}],
+    mangal:[{id:'m1',title:'Mangal - Raksha Samagri', text: document.getElementById('defaultMangalText').value.trim()}],
+    krutidev:[{id:'k1',title:'Krutidev - America Iran', text: document.getElementById('defaultKrutidevText').value.trim()}]
+  };
+}
 function getMatters(){
-  let d=JSON.parse(localStorage.getItem(TM_KEY)||'null');
-  if(!d){d={english:[{id:'e1',title:'Lesson 1 - Computer Basic',text:'Computer is an electronic device that processes data and gives information.'}],mangal:[{id:'m1',title:'पाठ 1 - कंप्यूटर परिचय',text:'कंप्यूटर एक इलेक्ट्रॉनिक मशीन है।'}],krutidev:[{id:'k1',title:'ikB 1 - deokj iqj ifjp;',text:'deokj iqj,d bysDVªkfud e\'khu gS'}]};localStorage.setItem(TM_KEY,JSON.stringify(d));}
-  for(let k in d){d[k]=d[k].map(it=>typeof it==='string'?{id:Date.now()+Math.random(),title:it.slice(0,30),text:it}:it);}
-  return d;
+  try{
+    let s=localStorage.getItem(TM_KEY);
+    if(!s){let d=getDefaultMatters(); localStorage.setItem(TM_KEY,JSON.stringify(d)); return d;}
+    let p=JSON.parse(s);
+    if(!p.english || p.english.length==0) throw "old";
+    return p;
+  }catch(e){
+    localStorage.removeItem(TM_KEY);
+    let d=getDefaultMatters();
+    localStorage.setItem(TM_KEY,JSON.stringify(d));
+    return d;
+  }
 }
 function getDone(){return JSON.parse(localStorage.getItem(DONE_KEY)||'[]')}
-function markDone(id){let a=getDone();if(!a.includes(id)){a.push(id);localStorage.setItem(DONE_KEY,JSON.stringify(a));}}
-
-let currentMatter=null,timer=null,timeLeft=300,totalTyped=0,errors=0,isActive=false,currentUser={};
+function markDone(id){let a=getDone(); if(!a.includes(id)){a.push(id); localStorage.setItem(DONE_KEY,JSON.stringify(a));}}
+let currentMatter=null,timer=null,timeLeft=300,isActive=false,currentUser={},expectedWords=[],errors=0,totalChars=0;
 const display=document.getElementById('typingDisplay'),input=document.getElementById('input');
-function changeLang(){renderMatterList();}
+function changeLang(){renderMatterList(); document.getElementById('selectedTitle').innerText='Koi Matter Select Karo'; display.innerHTML='Please Select a title';}
 function renderMatterList(){
   let lang=document.getElementById('tLang').value;
   document.getElementById('langLabel').innerText=lang;
-  let matters=getMatters()[lang]||[];let done=getDone();
-  document.getElementById('matterList').innerHTML=matters.map(m=>`<div class="m-item ${currentMatter&&currentMatter.id==m.id?'active':''}" onclick="selectMatter('${m.id}')"><div><div class="t">${m.title}</div><div class="d">${m.text.slice(0,50)}...</div></div><div class="${done.includes(m.id)?'done':' ' }">${done.includes(m.id)?'✓':'○'}</div></div>`).join('')||'<div style="padding:20px;text-align:center;color:#888">Koi matter nahi - Admin me add karo</div>';
+  let matters=getMatters()[lang]||[]; let done=getDone();
+  if(matters.length==0){document.getElementById('matterList').innerHTML='<div style="padding:20px;text-align:center">No Matter</div>'; return;}
+  document.getElementById('matterList').innerHTML=matters.map(m=>{
+    let safeTitle = m.title.replace(/</g,'&lt;');
+    return '<div class="m-item '+(currentMatter&&currentMatter.id==m.id?'active':'')+'" onclick="selectMatter(\''+m.id+'\')"><div><div style="font-weight:700;font-size:14px">'+safeTitle+'</div><div style="font-size:11px;color:#64748b;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+m.text.slice(0,40)+'...</div></div><div class="'+(done.includes(m.id)?'done':'')+'">'+(done.includes(m.id)?'✓':'○')+'</div></div>';
+  }).join('');
 }
 function selectMatter(id){
   let lang=document.getElementById('tLang').value;
@@ -76,18 +100,47 @@ function selectMatter(id){
   document.getElementById('selectedTitle').innerText=currentMatter.title;
   renderText(); renderMatterList();
 }
-function formatTime(s){let m=Math.floor(s/60).toString().padStart(2,'0'),sec=(s%60).toString().padStart(2,'0');return `${m}:${sec}`}
-function openUserModal(){if(!currentMatter)return alert('Pehle baye taraf se koi Title select karo');document.getElementById('userModal').style.display='flex'}
-function closeUserModal(){document.getElementById('userModal').style.display='none'}
-function startTestWithUser(){let n=document.getElementById('uName').value.trim(),mob=document.getElementById('uMobile').value.trim();if(n.length<2||mob.length<10)return alert('Naam/Mobile bharo');currentUser={name:n,mobile:mob,date:new Date().toLocaleString()};closeUserModal();startTest();}
-function startTest(){clearInterval(timer);timeLeft=parseInt(document.getElementById('tTime').value);totalTyped=0;errors=0;isActive=true;input.value='';input.disabled=false;input.focus();document.getElementById('timeLeft').textContent=formatTime(timeLeft);timer=setInterval(()=>{timeLeft--;document.getElementById('timeLeft').textContent=formatTime(timeLeft);calc();if(timeLeft<=0)endTest();},1000);}
-function renderText(){let lang=document.getElementById('tLang').value;display.className='display '+lang;input.className=lang;display.innerHTML='';[...currentMatter.text].forEach((ch,i)=>{let s=document.createElement('span');s.textContent=ch;s.className=i==0?'current':'upcoming';display.appendChild(s);});}
-input.addEventListener('input',()=>{if(!isActive)return;let typed=input.value;totalTyped=typed.length;let spans=display.querySelectorAll('span');errors=0;spans.forEach((sp,i)=>{if(i<typed.length){if(typed[i]==sp.textContent){sp.className='correct'}else{sp.className='incorrect';errors++}}else if(i==typed.length){sp.className='current'}else{sp.className='upcoming'}});document.getElementById('err').textContent=errors;calc();});
-function calc(){let elapsed=parseInt(document.getElementById('tTime').value)-timeLeft;if(elapsed==0)elapsed=1;let wpm=Math.round((totalTyped/5)/(elapsed/60));let acc=totalTyped>0?Math.round(((totalTyped-errors)/totalTyped)*100):100;document.getElementById('wpm').textContent=wpm>0?wpm:0;document.getElementById('acc').textContent=acc+'%';}
-function endTest(){clearInterval(timer);isActive=false;input.disabled=true;let wpm=document.getElementById('wpm').textContent,acc=document.getElementById('acc').textContent;let result={id:Date.now().toString(),...currentUser,lang:document.getElementById('tLang').value,matterTitle:currentMatter.title,matterId:currentMatter.id,wpm,acc,errors,chars:totalTyped,time:document.getElementById('tTime').value};let all=JSON.parse(localStorage.getItem(TR_KEY)||'[]');all.push(result);localStorage.setItem(TR_KEY,JSON.stringify(all));markDone(currentMatter.id);showResult(result);}
-function showResult(r){document.getElementById('rNameShow').innerText=r.name+' - '+r.mobile;document.getElementById('rWpm').innerText=r.wpm;document.getElementById('rAcc').innerText=r.acc;document.getElementById('rErr').innerText=r.errors;document.getElementById('rChar').innerText=r.chars;document.getElementById('rTitleShow').innerText='Matter: '+r.matterTitle;let link=location.href.split('?')[0]+'?result='+r.id;document.getElementById('rLinkBox').innerText=link;document.getElementById('resultModal').style.display='flex';window.currentResult=r;}
-function shareResult(){let r=window.currentResult;let txt=`${r.name} - ${r.matterTitle} - WPM:${r.wpm} ${r.acc} - ${location.href}`;window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`);}
-function downloadResultPdf(){let r=window.currentResult;const{jsPDF}=window.jspdf;let doc=new jsPDF();doc.text('DCTC Typing Result',20,20);doc.text(`Name:${r.name}`,20,35);doc.text(`Matter:${r.matterTitle}`,20,45);doc.text(`WPM:${r.wpm} Acc:${r.acc}`,20,55);doc.save(`${r.name}-${r.matterTitle}.pdf`);}
+function formatTime(s){let m=Math.floor(s/60).toString().padStart(2,'0'),sec=(s%60).toString().padStart(2,'0'); return m+':'+sec;}
+function openUserModal(){if(!currentMatter)return alert('Pehle matter select karo'); document.getElementById('userModal').style.display='flex';}
+function closeUserModal(){document.getElementById('userModal').style.display='none';}
+function startTestWithUser(){let n=document.getElementById('uName').value.trim(),mob=document.getElementById('uMobile').value.trim(); if(n.length<2||mob.length<10)return alert('Naam/Mobile bharo'); currentUser={name:n,mobile:mob,date:new Date().toLocaleString()}; closeUserModal(); startTest();}
+function startTest(){clearInterval(timer); timeLeft=parseInt(document.getElementById('tTime').value); isActive=true; errors=0; totalChars=0; input.value=''; input.disabled=false; input.focus(); document.getElementById('timeLeft').textContent=formatTime(timeLeft); timer=setInterval(()=>{timeLeft--; document.getElementById('timeLeft').textContent=formatTime(timeLeft); calc(); if(timeLeft<=0)endTest();},1000);}
+function renderText(){
+  let lang=document.getElementById('tLang').value;
+  display.className='display '+lang; input.className=lang;
+  expectedWords=currentMatter.text.trim().split(/\s+/);
+  display.innerHTML='';
+  expectedWords.forEach((w,i)=>{let span=document.createElement('span'); span.textContent=w; span.className='word'+(i==0?' current':''); span.id='w-'+i; display.appendChild(span);});
+  display.scrollTop=0;
+}
+input.addEventListener('input',()=>{
+  if(!isActive)return;
+  let val=input.value;
+  if(val.endsWith(' ') || val.endsWith('\n')){
+    let allTyped=val.trim().split(/\s+/);
+    let idx=allTyped.length-1;
+    if(idx>=0 && idx<expectedWords.length){
+      let wEl=document.getElementById('w-'+idx);
+      if(wEl){
+        if(allTyped[idx]===expectedWords[idx]){wEl.className='word typed-correct';}else{wEl.className='word typed-incorrect'; errors++;}
+      }
+      let next=document.getElementById('w-'+(idx+1));
+      if(next){
+        next.className='word current';
+        next.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+      totalChars+=allTyped[idx].length+1;
+    }
+    if(allTyped.length>=expectedWords.length){endTest();}
+  }
+  document.getElementById('err').textContent=errors;
+  calc();
+});
+function calc(){let elapsed=parseInt(document.getElementById('tTime').value)-timeLeft; if(elapsed==0)elapsed=1; let wpm=Math.round((totalChars/5)/(elapsed/60)); let typedCount=input.value.trim().split(/\s+/).filter(x=>x).length; let acc=typedCount>0?Math.round(((typedCount-errors)/typedCount)*100):100; document.getElementById('wpm').textContent=wpm>0?wpm:0; document.getElementById('acc').textContent=acc+'%';}
+function endTest(){clearInterval(timer); isActive=false; input.disabled=true; let wpm=document.getElementById('wpm').textContent,acc=document.getElementById('acc').textContent; let result={id:Date.now().toString(),...currentUser,lang:document.getElementById('tLang').value,matterTitle:currentMatter.title,matterId:currentMatter.id,wpm,acc,errors,chars:totalChars,time:document.getElementById('tTime').value}; let all=JSON.parse(localStorage.getItem(TR_KEY)||'[]'); all.push(result); localStorage.setItem(TR_KEY,JSON.stringify(all)); markDone(currentMatter.id); showResult(result);}
+function showResult(r){document.getElementById('rNameShow').innerText=r.name+' - '+r.mobile; document.getElementById('rWpm').innerText=r.wpm; document.getElementById('rAcc').innerText=r.acc; document.getElementById('rErr').innerText=r.errors; document.getElementById('rChar').innerText=r.chars; document.getElementById('rTitleShow').innerText='Matter: '+r.matterTitle; document.getElementById('resultModal').style.display='flex'; window.currentResult=r;}
+function shareResult(){let r=window.currentResult; let txt=r.name+' - '+r.matterTitle+' - WPM:'+r.wpm+' '+r.acc; window.open('https://wa.me/?text='+encodeURIComponent(txt));}
+function downloadResultPdf(){let r=window.currentResult; const{jsPDF}=window.jspdf; let doc=new jsPDF(); doc.text('DCTC Typing Result',20,20); doc.text('Name:'+r.name,20,35); doc.text('Matter:'+r.matterTitle,20,45); doc.text('WPM:'+r.wpm+' Acc:'+r.acc,20,55); doc.save(r.name+'.pdf');}
 window.addEventListener('load',()=>{renderMatterList();});
 </script>
 </body>
