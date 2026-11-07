@@ -1,214 +1,479 @@
 <!DOCTYPE html>
 <html lang="hi">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Deva Computer Typing Center</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<script type="importmap">{"imports":{"firebase/app":"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js","firebase/firestore":"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"}}</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deva Computer Typing Center</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script
+    type="importmap">{"imports":{"firebase/app":"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js","firebase/firestore":"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"}}</script>
+  <style>
+    /* ===== CTSP RESULT POPUP - PREMIUM ===== */
+    #resultPopup {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 10, 40, .82);
+      backdrop-filter: blur(4px);
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px
+    }
+
+    #resultPopup.hidden {
+      display: none
+    }
+
+    .result-box {
+      background: linear-gradient(180deg, #fff 0%, #fff7f0 100%);
+      width: 100%;
+      max-width: 1080px;
+      max-height: 94vh;
+      overflow-y: auto;
+      border-radius: 20px;
+      padding: 0;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .4)
+    }
+
+    .result-head {
+      background: linear-gradient(90deg, #0b2e65, #ff8c00);
+      color: #fff;
+      padding: 22px 20px 18px;
+      border-radius: 20px 20px 0 0;
+      position: relative;
+      text-align: center
+    }
+
+    .result-close {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: #fff;
+      color: #0b2e65;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 22px;
+      cursor: pointer;
+      font-weight: 800;
+      z-index: 2
+    }
+
+    .result-head h2 {
+      margin: 4px 0 4px;
+      font-size: 26px
+    }
+
+    .result-head p {
+      margin: 0;
+      opacity: .95;
+      font-size: 14px
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      padding: 18px
+    }
+
+    @media(max-width:800px) {
+      .result-grid {
+        grid-template-columns: 1fr
+      }
+
+      .result-head h2 {
+        font-size: 21px
+      }
+    }
+
+    .result-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 14px;
+      border: 1px solid #ffe0b3;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+      text-align: center
+    }
+
+    .result-card h3 {
+      margin: 6px 0 2px;
+      color: #0b2e65;
+      font-size: 18px
+    }
+
+    .result-card .roll {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 8px
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+      margin: 4px 0 10px
+    }
+
+    .pass {
+      background: #d4edda;
+      color: #155724
+    }
+
+    .partial {
+      background: #fff3cd;
+      color: #856404
+    }
+
+    .toggle {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin: 8px 0 10px
+    }
+
+    .toggle button {
+      flex: 1;
+      padding: 8px;
+      border: 2px solid #0b2e65;
+      background: #fff;
+      color: #0b2e65;
+      border-radius: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 13px
+    }
+
+    .toggle button.active {
+      background: #0b2e65;
+      color: #fff
+    }
+
+    .toggle button:disabled {
+      opacity: .4;
+      cursor: not-allowed
+    }
+
+    .result-card img {
+      width: 100%;
+      height: 340px;
+      object-fit: contain;
+      background: #f9f9f9;
+      border-radius: 12px;
+      border: 1px solid #eee;
+      cursor: zoom-in
+    }
+
+    .speed {
+      font-size: 12px;
+      color: #555;
+      margin-top: 8px
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
-<div class="logo">Deva Computer <span>Typing Center</span></div>
-<nav><ul>
-<li><a href="#" onclick="showTab('home')">होम</a></li>
-<li><a href="#" onclick="showTab('library')">लाइब्रेरी</a></li>
-<li><a href="typing.html" style="background:#ff8c00;color:#000;padding:6px 14px;border-radius:8px;font-weight:800;">⌨️ Typing Test</a></li>
-<li><a href="#" onclick="showTab('reviews')">समीक्षा</a></li>
-<li><a href="admin.html" class="admin-btn">Admin</a></li>
-</ul></nav>
-</header>
+  <!-- ===== CTSP RESULT POPUP START - PREMIUM ===== -->
+  <div id="resultPopup">
+    <div class="result-box">
+      <div class="result-head">
+        <button class="result-close" onclick="closeResultPopup()">×</button>
+        <div style="font-size:38px">🏆</div>
+        <h2>Proud Moment! ✨</h2>
+        <p>आप तीनों को बहुत-बहुत बधाई एवं शुभकामनाएं! • Deva Computer Typing Center, Khairagarh</p>
+      </div>
 
-<div class="search-bar"><input type="text" id="searchInput" placeholder="🔍 CCC, Typing... सर्च करें" onkeyup="searchAll()"></div>
+      <div class="result-grid">
+        <!-- RUBI VERMA -->
+        <div class="result-card">
+          <h3>🥇 Rubi Verma</h3>
+          <div class="roll">CTSP • 2026 Batch</div>
+          <span class="badge pass">✅ CTSP PASS</span>
+          <div class="toggle">
+            <button id="rubi-h-btn" class="active" onclick="showResult('rubi','h')">Hindi ✅</button>
+            <button id="rubi-e-btn" onclick="showResult('rubi','e')">English ✅</button>
+          </div>
+          <img id="rubi-img" src="photos/photo1.jpeg" alt="Rubi Hindi Result" onclick="openBigImg(this.src)">
+          <div class="speed" id="rubi-label">Hindi Typing - PASS ✅ • Click karke bada dekhe</div>
+        </div>
 
-<section id="home" class="tab active">
-<div class="hero">
-<h1>देवा कंप्यूटर टाइपिंग सेंटर - ई-बुक लाइब्रेरी</h1>
-<a href="typing.html" class="btn-primary" style="max-width:340px;margin:18px auto 0;background:#ff8c00;color:#000">⌨️ Free Typing Test Start Kare</a>
-</div>
+        <!-- DIKSHA DEWANGAN -->
+        <div class="result-card">
+          <h3>🥇 Diksha Dewangan</h3>
+          <div class="roll">CTSP • 2026 Batch</div>
+          <span class="badge pass">✅ CTSP PASS</span>
+          <div class="toggle">
+            <button id="diksha-h-btn" class="active" onclick="showResult('diksha','h')">Hindi ✅</button>
+            <button id="diksha-e-btn" onclick="showResult('diksha','e')">English ✅</button>
+          </div>
+          <img id="diksha-img" src="photos/photo3.jpeg" alt="Diksha Hindi Result" onclick="openBigImg(this.src)">
+          <div class="speed" id="diksha-label">Hindi Typing - PASS ✅ • Click karke bada dekhe</div>
+        </div>
 
-<h2 class="section-title" id="browseTitle">Browse by Folder <span style="background:#0b2e65;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">DRIVE</span></h2>
-<button id="backBtn" onclick="goBack()" style="display:none;margin:10px 0;padding:6px 14px;border:none;background:#0b2e65;color:#fff;border-radius:6px;cursor:pointer">⬅️ Back</button>
-<div id="folderListHome" class="folder-grid">Loading Drive...</div>
-<div id="pdfInsideHome" class="pdf-grid" style="margin-top:15px"></div>
+        <!-- DOLLY SINHA -->
+        <div class="result-card">
+          <h3>🥇 Dolly Sinha</h3>
+          <div class="roll">CTSP • 2026 Batch</div>
+          <span class="badge partial">✅ Hindi Typing PASS</span>
+          <div class="toggle">
+            <button id="dolly-h-btn" class="active" onclick="showResult('dolly','h')">Hindi ✅</button>
+            <button disabled>English - NA</button>
+          </div>
+          <img id="dolly-img" src="photos/photo5.jpeg" alt="Dolly Hindi Result" onclick="openBigImg(this.src)">
+          <div class="speed">Hindi Typing - PASS ✅ • English - Not Appeared</div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:#888;text-align:center;padding:0 0 14px">* परिणाम आधिकारिक CTSP रिकॉर्ड के अनुसार
+      </p>
+    </div>
+  </div>
+  <!-- ===== CTSP RESULT POPUP END ===== -->
 
-<h2 class="section-title">Recent PDFs <span style="background:#00c851;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">LIVE</span></h2>
-<div id="recentPdfsLive" class="pdf-grid"></div>
-</section>
+  <!-- BIG IMAGE VIEWER -->
+  <div id="bigImgBox" onclick="this.style.display='none'"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:10001;justify-content:center;align-items:center;padding:10px">
+    <img id="bigImg" style="max-width:95%;max-height:95%;border-radius:10px;background:#fff">
+  </div>
 
-<section id="library" class="tab">
-<h2 class="section-title" id="libTitle">सभी फोल्डर</h2>
-<button id="libBackBtn" onclick="goBack()" style="display:none;margin:10px 0;padding:6px 14px;border:none;background:#0b2e65;color:#fff;border-radius:6px">⬅️ Back</button>
-<div id="folderListLib" class="folder-grid"></div>
-<div id="pdfInsideLib" class="pdf-grid" style="margin-top:15px"></div>
-</section>
+  <header>
+    <div class="logo">Deva Computer <span>Typing Center</span></div>
+    <nav>
+      <ul>
+        <li><a href="index.html" onclick="showTab('home')">होम</a></li>
+        <li><a href="#" onclick="showTab('library')">लाइब्रेरी</a></li>
+        <li><a href="typing.html"
+            style="background:#ff8c00;color:#000;padding:6px 14px;border-radius:8px;font-weight:800;">⌨️ Typing Test</a>
+        </li>
+        <li><a href="#" onclick="showTab('reviews')">समीक्षा</a></li>
+        <li><a href="admin.html" class="admin-btn">Admin</a></li>
+      </ul>
+    </nav>
+  </header>
 
-<section id="reviews" class="tab">
-<h2 class="section-title">समीक्षा</h2>
-<div class="review-form" style="max-width:500px;margin:auto;background:#fff;padding:15px;border-radius:10px">
-<input id="rName" placeholder="आपका नाम" style="width:100%;padding:10px;margin:5px 0">
-<select id="rRating" style="width:100%;padding:10px;margin:5px 0"><option value="5">⭐⭐⭐⭐⭐ 5 Star</option></select>
-<textarea id="rText" rows="3" placeholder="समीक्षा" style="width:100%;padding:10px"></textarea>
-<button class="btn-primary" onclick="submitReview()">भेजें</button><p id="rStatus"></p>
-</div>
-<div id="reviewListLive" style="max-width:600px;margin:15px auto"></div>
-</section>
+  <div class="search-bar"><input type="text" id="searchInput" placeholder="🔍 CCC, Typing... सर्च करें"
+      onkeyup="searchAll()"></div>
 
-<!-- PDF MODAL -->
-<div id="pdfModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;justify-content:center;align-items:center">
-<div style="background:#fff;width:95%;max-width:900px;border-radius:12px;padding:15px">
-<div style="display:flex;justify-content:space-between;align-items:center">
-<h3 id="pdfViewerTitle" style="margin:0;font-size:15px"></h3>
-<span onclick="closePdf()" style="font-size:28px;cursor:pointer">×</span>
-</div>
-<p id="pdfStatus" style="font-size:12px;color:#0b2e65;text-align:center;margin:8px 0">Loading...</p>
-<iframe id="pdfFrame" style="width:100%;height:60vh;border:none;background:#eee;border-radius:8px"></iframe>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
-<button onclick="downloadWithWatermark()" style="background:#0b2e65;padding:12px;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">📥 Download</button>
-<button onclick="sharePdf()" style="background:#25D366;padding:12px;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">📤 Share / Copy Link</button>
-</div>
-<p id="copyMsg" style="font-size:12px;color:green;text-align:center;display:none;margin-top:8px">✅ Link Copied!</p>
-</div>
-</div>
+  <section id="home" class="tab active">
+    <div class="hero">
+      <h1>देवा कंप्यूटर टाइपिंग सेंटर - ई-बुक लाइब्रेरी</h1>
+      <a href="typing.html" class="btn-primary"
+        style="max-width:340px;margin:18px auto 0;background:#ff8c00;color:#000">⌨️ Free Typing Test Start Kare</a>
+    </div>
 
-<footer>© 2026 Deva Computer Typing Center | 7748099814</footer>
+    <h2 class="section-title" id="browseTitle">Browse by Folder <span
+        style="background:#0b2e65;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">DRIVE</span></h2>
+    <button id="backBtn" onclick="goBack()"
+      style="display:none;margin:10px 0;padding:6px 14px;border:none;background:#0b2e65;color:#fff;border-radius:6px;cursor:pointer">⬅️
+      Back</button>
+    <div id="folderListHome" class="folder-grid">Loading Drive...</div>
+    <div id="pdfInsideHome" class="pdf-grid" style="margin-top:15px"></div>
 
-<script>
-const API_KEY = "AIzaSyC0Chi-s-7zBkphUXIY7zh3gjykKsbtgME"; // <-- YAHAN KEY DALO
-const ROOT_ID = "1PebT_V8tDkxZsxGODs4yO-Ns7mQ9ZZSg";
-let stack = [{id: ROOT_ID, name: "Home"}];
-let allRootItems = [];
-let currentPdfId = "";
-let currentPdfName = "";
-let currentPdfBlobUrl = "";
+    <h2 class="section-title">Recent PDFs <span
+        style="background:#00c851;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">LIVE</span></h2>
+    <div id="recentPdfsLive" class="pdf-grid"></div>
+  </section>
 
-async function loadDrive(folderId){
-  const homeGrid = document.getElementById('folderListHome');
-  const libGrid = document.getElementById('folderListLib');
-  const homePdf = document.getElementById('pdfInsideHome');
-  const libPdf = document.getElementById('pdfInsideLib');
-  const backBtn = document.getElementById('backBtn');
-  const libBackBtn = document.getElementById('libBackBtn');
+  <section id="library" class="tab">
+    <h2 class="section-title" id="libTitle">सभी फोल्डर</h2>
+    <button id="libBackBtn" onclick="goBack()"
+      style="display:none;margin:10px 0;padding:6px 14px;border:none;background:#0b2e65;color:#fff;border-radius:6px">⬅️
+      Back</button>
+    <div id="folderListLib" class="folder-grid"></div>
+    <div id="pdfInsideLib" class="pdf-grid" style="margin-top:15px"></div>
+  </section>
 
-  if(!homeGrid) return;
+  <section id="reviews" class="tab">
+    <h2 class="section-title">समीक्षा</h2>
+    <div class="review-form" style="max-width:500px;margin:auto;background:#fff;padding:15px;border-radius:10px">
+      <input id="rName" placeholder="आपका नाम" style="width:100%;padding:10px;margin:5px 0">
+      <select id="rRating" style="width:100%;padding:10px;margin:5px 0">
+        <option value="5">⭐⭐⭐⭐⭐ 5 Star</option>
+      </select>
+      <textarea id="rText" rows="3" placeholder="समीक्षा" style="width:100%;padding:10px"></textarea>
+      <button class="btn-primary" onclick="submitReview()">भेजें</button>
+      <p id="rStatus"></p>
+    </div>
+    <div id="reviewListLive" style="max-width:600px;margin:15px auto"></div>
+  </section>
 
-  try{
-    if(API_KEY.includes("YAHAN")){ homeGrid.innerHTML="⚠️ Pehle API_KEY daalo code me"; return; }
+  <!-- PDF MODAL -->
+  <div id="pdfModal"
+    style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;justify-content:center;align-items:center">
+    <div style="background:#fff;width:95%;max-width:900px;border-radius:12px;padding:15px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 id="pdfViewerTitle" style="margin:0;font-size:15px"></h3>
+        <span onclick="closePdf()" style="font-size:28px;cursor:pointer">×</span>
+      </div>
+      <p id="pdfStatus" style="font-size:12px;color:#0b2e65;text-align:center;margin:8px 0">Loading...</p>
+      <iframe id="pdfFrame" style="width:100%;height:60vh;border:none;background:#eee;border-radius:8px"></iframe>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+        <button onclick="downloadWithWatermark()"
+          style="background:#0b2e65;padding:12px;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">📥
+          Download</button>
+        <button onclick="sharePdf()"
+          style="background:#25D366;padding:12px;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">📤
+          Share / Copy Link</button>
+      </div>
+      <p id="copyMsg" style="font-size:12px;color:green;text-align:center;display:none;margin-top:8px">✅ Link Copied!
+      </p>
+    </div>
+  </div>
 
-    const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&key=${API_KEY}&fields=files(id,name,mimeType)&orderBy=name`;
-    const res = await fetch(url);
-    const data = await res.json();
-    
-    if(data.error){ homeGrid.innerHTML="Drive Error: "+data.error.message+"<br>API enable karo aur Folder Public karo"; return; }
+  <footer>© 2026 Deva Computer Typing Center | 7748099814</footer>
 
-    const items = data.files || [];
-    if(folderId === ROOT_ID) allRootItems = items;
+  <script>
+    // ===== RESULT POPUP JS =====
+    function closeResultPopup() { document.getElementById('resultPopup').classList.add('hidden'); }
+    function openBigImg(src) { document.getElementById('bigImg').src = src; document.getElementById('bigImgBox').style.display = 'flex'; }
+    document.getElementById('resultPopup').addEventListener('click', function (e) { if (e.target.id === 'resultPopup') closeResultPopup(); });
+    function showResult(name, lang) {
+      const map = {
+        rubi: { h: 'photos/photo1.jpeg', e: 'photos/photo2.jpeg' },
+        diksha: { h: 'photos/photo3.jpeg', e: 'photos/photo4.jpeg' },
+        dolly: { h: 'photos/photo5.jpeg', e: 'photos/photo5.jpeg' }
+      };
+      document.getElementById(name + '-img').src = map[name][lang];
+      document.getElementById(name + '-h-btn').classList.toggle('active', lang === 'h');
+      const eBtn = document.getElementById(name + '-e-btn');
+      if (eBtn) eBtn.classList.toggle('active', lang === 'e');
+      const lbl = document.getElementById(name + '-label');
+      if (lbl) lbl.innerText = (lang === 'h' ? 'Hindi Typing - PASS ✅' : 'English Typing - PASS ✅') + ' • Click karke bada dekhe';
+    }
 
-    const isRoot = (stack.length===1);
-    if(isRoot){
-      homeGrid.innerHTML=""; if(libGrid) libGrid.innerHTML=""; homePdf.innerHTML=""; libPdf.innerHTML="";
-      if(backBtn) backBtn.style.display="none"; if(libBackBtn) libBackBtn.style.display="none";
-      if(items.length===0){ homeGrid.innerHTML="Folder khali hai"; return; }
-      items.forEach(f=>{
+    const API_KEY = "AIzaSyC0Chi-s-7zBkphUXIY7zh3gjykKsbtgME";
+    const ROOT_ID = "1PebT_V8tDkxZsxGODs4yO-Ns7mQ9ZZSg";
+    let stack = [{ id: ROOT_ID, name: "Home" }];
+    let allRootItems = [];
+    let currentPdfId = "";
+    let currentPdfName = "";
+    let currentPdfBlobUrl = "";
+
+    async function loadDrive(folderId) {
+      const homeGrid = document.getElementById('folderListHome');
+      const libGrid = document.getElementById('folderListLib');
+      const homePdf = document.getElementById('pdfInsideHome');
+      const libPdf = document.getElementById('pdfInsideLib');
+      const backBtn = document.getElementById('backBtn');
+      const libBackBtn = document.getElementById('libBackBtn');
+      if (!homeGrid) return;
+      try {
+        if (API_KEY.includes("YAHAN")) { homeGrid.innerHTML = "⚠️ Pehle API_KEY daalo code me"; return; }
+        const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&key=${API_KEY}&fields=files(id,name,mimeType)&orderBy=name`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.error) { homeGrid.innerHTML = "Drive Error: " + data.error.message + "<br>API enable karo aur Folder Public karo"; return; }
+        const items = data.files || [];
+        if (folderId === ROOT_ID) allRootItems = items;
+        const isRoot = (stack.length === 1);
+        if (isRoot) {
+          homeGrid.innerHTML = ""; if (libGrid) libGrid.innerHTML = ""; homePdf.innerHTML = ""; libPdf.innerHTML = "";
+          if (backBtn) backBtn.style.display = "none"; if (libBackBtn) libBackBtn.style.display = "none";
+          if (items.length === 0) { homeGrid.innerHTML = "Folder khali hai"; return; }
+          items.forEach(f => {
+            const isFolder = f.mimeType === "application/vnd.google-apps.folder";
+            const card = `<div class="pdf-card" style="background:#fff;padding:12px;border-radius:10px;box-shadow:0 2px 8px #0001;text-align:center"><b style="font-size:13px">${isFolder ? '📁' : '📄'} ${f.name}</b><br><button class="btn-primary" style="margin-top:8px;width:100%" onclick="${isFolder ? `openFolder('${f.id}','${f.name}')` : `openPdf('${f.id}','${f.name}')`}">View</button></div>`;
+            homeGrid.innerHTML += card; if (libGrid) libGrid.innerHTML += card;
+          });
+        } else {
+          homeGrid.innerHTML = ""; if (libGrid) libGrid.innerHTML = ""; homePdf.innerHTML = ""; libPdf.innerHTML = "";
+          if (backBtn) backBtn.style.display = "inline-block"; if (libBackBtn) libBackBtn.style.display = "inline-block";
+          items.forEach(f => {
+            const isFolder = f.mimeType === "application/vnd.google-apps.folder";
+            const card = `<div class="pdf-card" style="background:#fff;padding:12px;border-radius:10px;box-shadow:0 2px 8px #0001"><b>${isFolder ? '📁' : '📄'} ${f.name}</b><br><button class="btn-primary" style="margin-top:8px" onclick="${isFolder ? `openFolder('${f.id}','${f.name}')` : `openPdf('${f.id}','${f.name}')`}">${isFolder ? 'Open Folder' : '📄 Open PDF'}</button></div>`;
+            homePdf.innerHTML += card; libPdf.innerHTML += card;
+          });
+        }
+      } catch (e) {
+        console.error(e);
+        if (homeGrid) homeGrid.innerHTML = "Error: " + e.message;
+      }
+    }
+
+    function openFolder(id, name) { stack.push({ id, name }); loadDrive(id); showTab('home'); }
+    function goBack() { if (stack.length <= 1) return; stack.pop(); loadDrive(stack[stack.length - 1].id); }
+
+    async function openPdf(id, name) {
+      currentPdfId = id; currentPdfName = name;
+      const modal = document.getElementById('pdfModal');
+      if (modal) { modal.style.display = 'flex'; }
+      document.getElementById('pdfViewerTitle').innerText = name;
+      document.getElementById('pdfStatus').innerText = "⏳ DEVA WATERMARK laga rahe hain...";
+      document.getElementById('pdfFrame').src = "";
+      try {
+        const url = `https://www.googleapis.com/drive/v3/files/${id}?alt=media&key=${API_KEY}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("File public nahi hai");
+        const originalBytes = await res.arrayBuffer();
+        const pdfDoc = await PDFLib.PDFDocument.load(originalBytes);
+        const pages = pdfDoc.getPages();
+        const font = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+        pages.forEach(page => {
+          const { width, height } = page.getSize();
+          page.drawText("DEVA COMPUTER TYPING CENTRE, KHAIRAGARH", {
+            x: width / 3.3 - 220, y: height / 91, size: 37, font: font,
+            color: PDFLib.rgb(0.75, 0.75, 0.75), opacity: 0.25, rotate: PDFLib.degrees(35),
+          });
+        });
+        const watermarkedBytes = await pdfDoc.save();
+        const blob = new Blob([watermarkedBytes], { type: "application/pdf" });
+        if (currentPdfBlobUrl) URL.revokeObjectURL(currentPdfBlobUrl);
+        currentPdfBlobUrl = URL.createObjectURL(blob);
+        document.getElementById('pdfFrame').src = currentPdfBlobUrl;
+        document.getElementById('pdfStatus').innerText = "✅ Ready - Watermarked by DEVA COMPUTER";
+      } catch (e) {
+        document.getElementById('pdfStatus').innerText = "Direct Drive preview";
+        document.getElementById('pdfFrame').src = `https://drive.google.com/file/d/${id}/preview`;
+      }
+    }
+
+    function downloadWithWatermark() {
+      if (!currentPdfBlobUrl) { alert("Pehle PDF load hone do"); return; }
+      const a = document.createElement('a'); a.href = currentPdfBlobUrl;
+      a.download = currentPdfName.replace(".pdf", "") + "_DEVA.pdf"; a.click();
+    }
+
+    async function sharePdf() {
+      const shareUrl = `https://drive.google.com/file/d/${currentPdfId}/view`;
+      if (navigator.share) { try { await navigator.share({ title: currentPdfName, url: shareUrl }); return; } catch (e) { } }
+      try { await navigator.clipboard.writeText(shareUrl); const msg = document.getElementById('copyMsg'); msg.style.display = "block"; msg.innerText = "✅ Link Copied: " + shareUrl; setTimeout(() => msg.style.display = "none", 3000); } catch (e) { prompt("Copy:", shareUrl); }
+    }
+
+    function closePdf() { const m = document.getElementById('pdfModal'); if (m) m.style.display = 'none'; document.getElementById('pdfFrame').src = ""; }
+    function searchAll() {
+      const q = document.getElementById('searchInput')?.value.toLowerCase() || "";
+      if (!q) { loadDrive(stack[stack.length - 1].id); return; }
+      const filtered = allRootItems.filter(f => f.name.toLowerCase().includes(q));
+      const homeGrid = document.getElementById('folderListHome'); const libGrid = document.getElementById('folderListLib');
+      homeGrid.innerHTML = ""; if (libGrid) libGrid.innerHTML = ""; document.getElementById('pdfInsideHome').innerHTML = ""; document.getElementById('pdfInsideLib').innerHTML = "";
+      filtered.forEach(f => {
         const isFolder = f.mimeType === "application/vnd.google-apps.folder";
-        const card = `<div class="pdf-card" style="background:#fff;padding:12px;border-radius:10px;box-shadow:0 2px 8px #0001;text-align:center"><b style="font-size:13px">${isFolder?'📁':'📄'} ${f.name}</b><br><button class="btn-primary" style="margin-top:8px;width:100%" onclick="${isFolder?`openFolder('${f.id}','${f.name}')`:`openPdf('${f.id}','${f.name}')`}">View</button></div>`;
-        homeGrid.innerHTML+=card; if(libGrid) libGrid.innerHTML+=card;
-      });
-    } else {
-      homeGrid.innerHTML=""; if(libGrid) libGrid.innerHTML=""; homePdf.innerHTML=""; libPdf.innerHTML="";
-      if(backBtn) backBtn.style.display="inline-block"; if(libBackBtn) libBackBtn.style.display="inline-block";
-      items.forEach(f=>{
-        const isFolder = f.mimeType === "application/vnd.google-apps.folder";
-        const card = `<div class="pdf-card" style="background:#fff;padding:12px;border-radius:10px;box-shadow:0 2px 8px #0001"><b>${isFolder?'📁':'📄'} ${f.name}</b><br><button class="btn-primary" style="margin-top:8px" onclick="${isFolder?`openFolder('${f.id}','${f.name}')`:`openPdf('${f.id}','${f.name}')`}">${isFolder?'Open Folder':'📄 Open PDF'}</button></div>`;
-        homePdf.innerHTML+=card; libPdf.innerHTML+=card;
+        const card = `<div class="pdf-card"><b>${isFolder ? '📁' : '📄'} ${f.name}</b><br><button class="btn-primary" onclick="${isFolder ? `openFolder('${f.id}','${f.name}')` : `openPdf('${f.id}','${f.name}')`}">View</button></div>`;
+        homeGrid.innerHTML += card; if (libGrid) libGrid.innerHTML += card;
       });
     }
-  }catch(e){
-    console.error(e);
-    if(homeGrid) homeGrid.innerHTML="Error: "+e.message;
-  }
-}
+    function showTab(id) {
+      document.querySelectorAll('.tab').forEach(t => { if (t) t.style.display = 'none'; });
+      const el = document.getElementById(id); if (el) el.style.display = 'block';
+    }
+    loadDrive(ROOT_ID);
+  </script>
 
-function openFolder(id,name){ stack.push({id,name}); loadDrive(id); showTab('home'); }
-function goBack(){ if(stack.length<=1) return; stack.pop(); loadDrive(stack[stack.length-1].id); }
-
-async function openPdf(id,name){
-  currentPdfId=id; currentPdfName=name;
-  const modal = document.getElementById('pdfModal');
-  if(modal){ modal.style.display='flex'; }
-  document.getElementById('pdfViewerTitle').innerText=name;
-  document.getElementById('pdfStatus').innerText="⏳ DEVA WATERMARK laga rahe hain...";
-  document.getElementById('pdfFrame').src="";
-
-  try{
-    const url = `https://www.googleapis.com/drive/v3/files/${id}?alt=media&key=${API_KEY}`;
-    const res = await fetch(url);
-    if(!res.ok) throw new Error("File public nahi hai");
-    const originalBytes = await res.arrayBuffer();
-    const pdfDoc = await PDFLib.PDFDocument.load(originalBytes);
-    const pages = pdfDoc.getPages();
-    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-    pages.forEach(page=>{
-      const {width, height} = page.getSize();
-      page.drawText("DEVA COMPUTER TYPING CENTRE, KHAIRAGARH", {
-        x: width/3.3 - 220, y: height/91, size: 37, font: font,
-        color: PDFLib.rgb(0.75,0.75,0.75), opacity: 0.25, rotate: PDFLib.degrees(35),
-      });
-    });
-    const watermarkedBytes = await pdfDoc.save();
-    const blob = new Blob([watermarkedBytes], {type: "application/pdf"});
-    if(currentPdfBlobUrl) URL.revokeObjectURL(currentPdfBlobUrl);
-    currentPdfBlobUrl = URL.createObjectURL(blob);
-    document.getElementById('pdfFrame').src = currentPdfBlobUrl;
-    document.getElementById('pdfStatus').innerText="✅ Ready - Watermarked by DEVA COMPUTER";
-  }catch(e){
-    document.getElementById('pdfStatus').innerText="Direct Drive preview";
-    document.getElementById('pdfFrame').src=`https://drive.google.com/file/d/${id}/preview`;
-  }
-}
-
-function downloadWithWatermark(){
-  if(!currentPdfBlobUrl){ alert("Pehle PDF load hone do"); return; }
-  const a = document.createElement('a'); a.href = currentPdfBlobUrl;
-  a.download = currentPdfName.replace(".pdf","") + "_DEVA.pdf"; a.click();
-}
-
-async function sharePdf(){
-  const shareUrl = `https://drive.google.com/file/d/${currentPdfId}/view`;
-  if(navigator.share){ try{ await navigator.share({title: currentPdfName, url: shareUrl}); return; }catch(e){} }
-  try{ await navigator.clipboard.writeText(shareUrl); const msg=document.getElementById('copyMsg'); msg.style.display="block"; msg.innerText="✅ Link Copied: "+shareUrl; setTimeout(()=>msg.style.display="none",3000); }catch(e){ prompt("Copy:", shareUrl); }
-}
-
-function closePdf(){ const m=document.getElementById('pdfModal'); if(m) m.style.display='none'; document.getElementById('pdfFrame').src=""; }
-function searchAll(){
-  const q = document.getElementById('searchInput')?.value.toLowerCase() || "";
-  if(!q){ loadDrive(stack[stack.length-1].id); return; }
-  const filtered = allRootItems.filter(f=>f.name.toLowerCase().includes(q));
-  const homeGrid=document.getElementById('folderListHome'); const libGrid=document.getElementById('folderListLib');
-  homeGrid.innerHTML=""; if(libGrid) libGrid.innerHTML=""; document.getElementById('pdfInsideHome').innerHTML=""; document.getElementById('pdfInsideLib').innerHTML="";
-  filtered.forEach(f=>{
-    const isFolder = f.mimeType === "application/vnd.google-apps.folder";
-    const card = `<div class="pdf-card"><b>${isFolder?'📁':'📄'} ${f.name}</b><br><button class="btn-primary" onclick="${isFolder?`openFolder('${f.id}','${f.name}')`:`openPdf('${f.id}','${f.name}')`}">View</button></div>`;
-    homeGrid.innerHTML+=card; if(libGrid) libGrid.innerHTML+=card;
-  });
-}
-function showTab(id){ 
-  document.querySelectorAll('.tab').forEach(t=>{ if(t) t.style.display='none'; }); 
-  const el=document.getElementById(id); if(el) el.style.display='block'; 
-}
-
-loadDrive(ROOT_ID);
-</script>
-
-<script type="module">
-import {initializeApp} from "firebase/app"; import {getFirestore,collection,addDoc,serverTimestamp,query,orderBy,onSnapshot} from "firebase/firestore";
-const firebaseConfig={apiKey:"AIzaSyBrbk1SVhXsiBYWlYvf0fDkrl6_ZX1Kwro",authDomain:"deva-computer-typing-centre.firebaseapp.com",projectId:"deva-computer-typing-centre",storageBucket:"deva-computer-typing-centre.firebasestorage.app",messagingSenderId:"929826218031",appId:"1:929826218031:web:56f632b060130c85fb66da"};
-const db=getFirestore(initializeApp(firebaseConfig));
-window.submitReview=async()=>{ const n=document.getElementById('rName')?.value.trim(); const r=document.getElementById('rRating')?.value; const m=document.getElementById('rText')?.value.trim(); if(!n||!m) return alert('Naam likho'); await addDoc(collection(db,"reviews"),{name:n,rating:parseInt(r),message:m,createdAt:serverTimestamp()}); const s=document.getElementById('rStatus'); if(s) s.innerText='✅ Review Live!'; };
-const qR=query(collection(db,"reviews"),orderBy("createdAt","desc")); onSnapshot(qR,s=>{ const el=document.getElementById('reviewListLive'); if(!el) return; el.innerHTML=''; s.forEach(d=>{ const r=d.data(); el.innerHTML+=`<div style="background:#fff;padding:10px;margin:6px 0;border-radius:8px;border-left:4px solid #00c851"><b>${r.name}</b> ${'⭐'.repeat(r.rating||5)}<br>${r.message}</div>` }); });
-const qP=query(collection(db,"pdfs"),orderBy("createdAt","desc")); onSnapshot(qP,s=>{ const el=document.getElementById('recentPdfsLive'); if(!el) return; el.innerHTML=''; s.forEach(d=>{ const p=d.data(); el.innerHTML+=`<div class="pdf-card"><b>${p.name}</b><br><a href="${p.url}" target="_blank" class="btn-primary">📄 View</a></div>` }); });
-</script>
+  <script type="module">
+    import { initializeApp } from "firebase/app"; import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "firebase/firestore";
+    const firebaseConfig = { apiKey: "AIzaSyBrbk1SVhXsiBYWlYvf0fDkrl6_ZX1Kwro", authDomain: "deva-computer-typing-centre.firebaseapp.com", projectId: "deva-computer-typing-centre", storageBucket: "deva-computer-typing-centre.firebasestorage.app", messagingSenderId: "929826218031", appId: "1:929826218031:web:56f632b060130c85fb66da" };
+    const db = getFirestore(initializeApp(firebaseConfig));
+    window.submitReview = async () => { const n = document.getElementById('rName')?.value.trim(); const r = document.getElementById('rRating')?.value; const m = document.getElementById('rText')?.value.trim(); if (!n || !m) return alert('Naam likho'); await addDoc(collection(db, "reviews"), { name: n, rating: parseInt(r), message: m, createdAt: serverTimestamp() }); const s = document.getElementById('rStatus'); if (s) s.innerText = '✅ Review Live!'; };
+    const qR = query(collection(db, "reviews"), orderBy("createdAt", "desc")); onSnapshot(qR, s => { const el = document.getElementById('reviewListLive'); if (!el) return; el.innerHTML = ''; s.forEach(d => { const r = d.data(); el.innerHTML += `<div style="background:#fff;padding:10px;margin:6px 0;border-radius:8px;border-left:4px solid #00c851"><b>${r.name}</b> ${'⭐'.repeat(r.rating || 5)}<br>${r.message}</div>` }); });
+    const qP = query(collection(db, "pdfs"), orderBy("createdAt", "desc")); onSnapshot(qP, s => { const el = document.getElementById('recentPdfsLive'); if (!el) return; el.innerHTML = ''; s.forEach(d => { const p = d.data(); el.innerHTML += `<div class="pdf-card"><b>${p.name}</b><br><a href="${p.url}" target="_blank" class="btn-primary">📄 View</a></div>` }); });
+  </script>
 </body>
+
 </html>
